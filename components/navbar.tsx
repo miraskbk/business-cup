@@ -12,7 +12,7 @@ export function Navbar() {
             AppName
           </Link>
           <Link
-            href="/notes"
+            href="/protected/items"
             className="text-muted-foreground hover:text-foreground"
           >
             Notes
