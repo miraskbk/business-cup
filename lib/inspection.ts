@@ -1,26 +1,28 @@
 import type { Condition, InspectionItem, InspectionPhase } from "./types.ts";
 
 /** The rooms and items every checklist starts with. Users can add their own. */
-export const PRESET_ROOMS: readonly { room: string; items: readonly string[] }[] =
-  [
-    {
-      room: "Kitchen",
-      items: ["Countertop", "Sink and faucet", "Appliances", "Cabinets", "Floor"],
-    },
-    {
-      room: "Living room",
-      items: ["Walls", "Floor or carpet", "Windows and blinds", "Light fixtures"],
-    },
-    {
-      room: "Bedroom",
-      items: ["Walls", "Floor or carpet", "Closet", "Windows and blinds"],
-    },
-    {
-      room: "Bathroom",
-      items: ["Sink and faucet", "Toilet", "Shower or tub", "Floor", "Walls"],
-    },
-    { room: "Entry", items: ["Front door and locks", "Floor"] },
-  ];
+export const PRESET_ROOMS: readonly {
+  room: string;
+  items: readonly string[];
+}[] = [
+  {
+    room: "Kitchen",
+    items: ["Countertop", "Sink and faucet", "Appliances", "Cabinets", "Floor"],
+  },
+  {
+    room: "Living room",
+    items: ["Walls", "Floor or carpet", "Windows and blinds", "Light fixtures"],
+  },
+  {
+    room: "Bedroom",
+    items: ["Walls", "Floor or carpet", "Closet", "Windows and blinds"],
+  },
+  {
+    room: "Bathroom",
+    items: ["Sink and faucet", "Toilet", "Shower or tub", "Floor", "Walls"],
+  },
+  { room: "Entry", items: ["Front door and locks", "Floor"] },
+];
 
 export const CONDITIONS: readonly Condition[] = ["good", "fair", "damaged"];
 
@@ -43,6 +45,52 @@ export type ChecklistLine = {
 };
 
 export type ChecklistRoom = { room: string; lines: ChecklistLine[] };
+
+export type ComparisonLine = {
+  room: string;
+  item: string;
+  moveIn: InspectionItem[];
+  moveOut: InspectionItem[];
+};
+
+/** Pair by room and item, keeping every recording in chronological order. */
+export function buildComparison(
+  entries: readonly InspectionItem[],
+): { room: string; lines: ComparisonLine[] }[] {
+  const rooms = PRESET_ROOMS.map(({ room, items }) => ({
+    room,
+    lines: items.map(
+      (item): ComparisonLine => ({
+        room,
+        item,
+        moveIn: [],
+        moveOut: [],
+      }),
+    ),
+  }));
+
+  for (const entry of [...entries].sort((a, b) =>
+    a.captured_at.localeCompare(b.captured_at),
+  )) {
+    let room = rooms.find((r) => sameName(r.room, entry.room));
+    if (!room) {
+      room = { room: entry.room.trim(), lines: [] };
+      rooms.push(room);
+    }
+    let line = room.lines.find((line) => sameName(line.item, entry.item));
+    if (!line) {
+      line = {
+        room: room.room,
+        item: entry.item.trim(),
+        moveIn: [],
+        moveOut: [],
+      };
+      room.lines.push(line);
+    }
+    (entry.phase === "move_in" ? line.moveIn : line.moveOut).push(entry);
+  }
+  return rooms;
+}
 
 const sameName = (a: string, b: string) =>
   a.trim().toLowerCase() === b.trim().toLowerCase();

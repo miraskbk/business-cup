@@ -4,6 +4,7 @@ import { formatDateTime } from "./format.ts";
 import {
   PRESET_ROOMS,
   buildChecklist,
+  buildComparison,
   checklistProgress,
   evidencePhotoPath,
 } from "./inspection.ts";
@@ -28,6 +29,36 @@ function entry(overrides: Partial<InspectionItem>): InspectionItem {
 }
 
 const presetTotal = PRESET_ROOMS.reduce((n, room) => n + room.items.length, 0);
+
+describe("buildComparison", () => {
+  it("pairs both phases case-insensitively, with presets first", () => {
+    const before = entry({ room: " kitchen ", item: "COUNTERTOP" });
+    const after = entry({ phase: "move_out" });
+    const line = buildComparison([after, before])[0].lines[0];
+    assert.deepEqual(line, {
+      room: "Kitchen",
+      item: "Countertop",
+      moveIn: [before],
+      moveOut: [after],
+    });
+  });
+  it("keeps unmatched custom items and every repeated recording without duplicating pairs", () => {
+    const first = entry({ room: "Garage", item: "Door" });
+    const second = entry({ room: "garage", item: "door" });
+    const outOnly = entry({
+      room: "Garage",
+      item: "Window",
+      phase: "move_out",
+    });
+    const input = [second, outOnly, first];
+    const lines = buildComparison(input).at(-1)!.lines;
+    assert.deepEqual(lines[0].moveIn, [first, second]);
+    assert.deepEqual(lines[0].moveOut, []);
+    assert.deepEqual(lines[1].moveOut, [outOnly]);
+    assert.deepEqual(lines[1].moveIn, []);
+    assert.deepEqual(input, [second, outOnly, first], "does not mutate input");
+  });
+});
 
 describe("buildChecklist", () => {
   it("lists every preset item as to-do when nothing is recorded", () => {

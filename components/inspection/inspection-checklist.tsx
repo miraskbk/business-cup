@@ -9,6 +9,7 @@ import {
   CONDITION_LABEL,
   PHASE_LABEL,
   buildChecklist,
+  buildComparison,
   checklistProgress,
   type ChecklistLine,
 } from "@/lib/inspection";
@@ -89,12 +90,12 @@ export function InspectionChecklist({ rental, phase }: Props) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from("inspection_items")
       .select("*")
-      .eq("rental_id", rental.id)
-      .eq("phase", phase)
-      .order("captured_at");
+      .eq("rental_id", rental.id);
+    if (phase === "move_in") query = query.eq("phase", phase);
+    const { data, error } = await query.order("captured_at");
     const rows = (data as InspectionItem[] | null) ?? [];
     setLoadError(error ? error.message : null);
     setEntries(rows);
@@ -109,7 +110,16 @@ export function InspectionChecklist({ rental, phase }: Props) {
   }, [load]);
 
   const rooms = useMemo(() => buildChecklist(entries, phase), [entries, phase]);
-  const progress = checklistProgress(rooms);
+  const comparison = useMemo(() => buildComparison(entries), [entries]);
+  const comparisonLines = comparison.flatMap((room) => room.lines);
+  const progress =
+    phase === "move_out"
+      ? {
+          recorded: comparisonLines.filter((line) => line.moveOut.length > 0)
+            .length,
+          total: comparisonLines.length,
+        }
+      : checklistProgress(rooms);
 
   function handleRecorded(entry: InspectionItem) {
     setEntries((prev) => [...prev, entry]);
@@ -192,49 +202,161 @@ export function InspectionChecklist({ rental, phase }: Props) {
         </div>
       </div>
 
-      {rooms.map((room) => {
-        const done = room.lines.filter((line) => line.entry).length;
-        return (
-          <section key={room.room} className="rounded-lg border">
-            <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
-              <h3 className="font-semibold">
-                {room.room}
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  {done}/{room.lines.length}
-                </span>
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setRecording({ room: room.room, item: null })}
-                aria-label={`Add an item to ${room.room}`}
-              >
-                <Plus />
-                Add item
-              </Button>
-            </header>
-            <ul className="divide-y">
-              {room.lines.map((line) => (
-                <li key={line.entry?.id ?? `todo-${line.item}`}>
-                  <ChecklistRow
-                    line={line}
-                    photoUrl={
-                      line.entry?.photo_path
-                        ? photoUrls[line.entry.photo_path]
-                        : undefined
-                    }
-                    onRecord={() =>
-                      setRecording({ room: line.room, item: line.item })
-                    }
-                    onView={() => setViewing(line.entry)}
-                    onRemove={() => setRemoving(line.entry)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
+      {phase === "move_out" && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">
+              Compare move-in and move-out
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Match the same item across both inspections. Every recording keeps
+              its original timestamp.
+            </p>
+          </div>
+          {comparison.map((room) => (
+            <section
+              key={room.room}
+              className="overflow-hidden rounded-lg border"
+            >
+              <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
+                <h3 className="font-semibold">{room.room}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRecording({ room: room.room, item: null })}
+                  aria-label={`Add an item to ${room.room}`}
+                >
+                  <Plus />
+                  Add item
+                </Button>
+              </header>
+              <ul className="divide-y">
+                {room.lines.map((line) => (
+                  <li
+                    key={line.item}
+                    data-comparison-item={`${line.room} ${line.item}`}
+                  >
+                    <h4 className="px-4 pt-3 font-medium">{line.item}</h4>
+                    <div className="grid sm:grid-cols-2 sm:divide-x">
+                      {(["move_in", "move_out"] as const).map((side) => {
+                        const recorded =
+                          side === "move_in" ? line.moveIn : line.moveOut;
+                        return (
+                          <div
+                            key={side}
+                            className="min-w-0 py-2"
+                            data-phase={side}
+                          >
+                            <p className="px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              {PHASE_LABEL[side]}
+                            </p>
+                            {recorded.map((entry) => (
+                              <ChecklistRow
+                                key={entry.id}
+                                largePhoto
+                                line={{
+                                  room: line.room,
+                                  item: line.item,
+                                  entry,
+                                }}
+                                photoUrl={
+                                  entry.photo_path
+                                    ? photoUrls[entry.photo_path]
+                                    : undefined
+                                }
+                                onRecord={() =>
+                                  setRecording({
+                                    room: line.room,
+                                    item: line.item,
+                                  })
+                                }
+                                onView={() => setViewing(entry)}
+                                onRemove={
+                                  side === "move_out"
+                                    ? () => setRemoving(entry)
+                                    : undefined
+                                }
+                              />
+                            ))}
+                            {recorded.length === 0 && (
+                              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                                <p className="text-sm text-muted-foreground">
+                                  No {PHASE_LABEL[side].toLowerCase()} record
+                                </p>
+                                {side === "move_out" && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      setRecording({
+                                        room: line.room,
+                                        item: line.item,
+                                      })
+                                    }
+                                    aria-label={`Record ${line.room} ${line.item}`}
+                                  >
+                                    <Camera />
+                                    Record
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )}
+
+      {phase === "move_in" &&
+        rooms.map((room) => {
+          const done = room.lines.filter((line) => line.entry).length;
+          return (
+            <section key={room.room} className="rounded-lg border">
+              <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
+                <h3 className="font-semibold">
+                  {room.room}
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    {done}/{room.lines.length}
+                  </span>
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRecording({ room: room.room, item: null })}
+                  aria-label={`Add an item to ${room.room}`}
+                >
+                  <Plus />
+                  Add item
+                </Button>
+              </header>
+              <ul className="divide-y">
+                {room.lines.map((line) => (
+                  <li key={line.entry?.id ?? `todo-${line.item}`}>
+                    <ChecklistRow
+                      line={line}
+                      photoUrl={
+                        line.entry?.photo_path
+                          ? photoUrls[line.entry.photo_path]
+                          : undefined
+                      }
+                      onRecord={() =>
+                        setRecording({ room: line.room, item: line.item })
+                      }
+                      onView={() => setViewing(line.entry)}
+                      onRemove={() => setRemoving(line.entry)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
 
       <RecordItemDialog
         target={recording}
@@ -288,12 +410,14 @@ function ChecklistRow({
   onRecord,
   onView,
   onRemove,
+  largePhoto = false,
 }: {
   line: ChecklistLine;
   photoUrl: string | undefined;
   onRecord: () => void;
   onView: () => void;
-  onRemove: () => void;
+  onRemove?: () => void;
+  largePhoto?: boolean;
 }) {
   const { entry } = line;
 
@@ -318,13 +442,15 @@ function ChecklistRow({
   }
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3">
+    <div
+      className={`flex items-start gap-3 px-4 py-3 ${largePhoto ? "flex-col" : ""}`}
+    >
       {entry.photo_path ? (
         <button
           type="button"
           onClick={onView}
           aria-label={`View photo of ${line.room} ${entry.item}`}
-          className="size-16 shrink-0 overflow-hidden rounded-md border bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={`${largePhoto ? "h-44 w-full" : "size-16"} shrink-0 overflow-hidden rounded-md border bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         >
           {photoUrl && (
             // Signed URLs from a private bucket change on every load, so
@@ -333,7 +459,7 @@ function ChecklistRow({
             <img
               src={photoUrl}
               alt=""
-              className="size-full object-cover"
+              className={`size-full ${largePhoto ? "object-contain" : "object-cover"}`}
               loading="lazy"
             />
           )}
@@ -362,15 +488,17 @@ function ChecklistRow({
         </p>
       </div>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="shrink-0 text-muted-foreground hover:text-destructive"
-        onClick={onRemove}
-        aria-label={`Remove ${line.room} ${entry.item}`}
-      >
-        <Trash2 />
-      </Button>
+      {onRemove && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0 text-muted-foreground hover:text-destructive"
+          onClick={onRemove}
+          aria-label={`Remove ${line.room} ${entry.item}`}
+        >
+          <Trash2 />
+        </Button>
+      )}
     </div>
   );
 }

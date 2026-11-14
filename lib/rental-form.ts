@@ -15,7 +15,10 @@ export type RentalDraft = {
 };
 
 /** What gets written to the `rentals` table. */
-export type RentalPayload = Omit<Rental, "id" | "user_id" | "created_at">;
+export type RentalPayload = Omit<
+  Rental,
+  "id" | "user_id" | "created_at" | "deposit_returned_at"
+>;
 
 export type RentalErrors = Partial<Record<keyof RentalDraft, string>>;
 
@@ -63,9 +66,7 @@ function parseMoney(raw: string): number | null {
  */
 export function validateRentalDraft(
   draft: RentalDraft,
-):
-  | { ok: true; payload: RentalPayload }
-  | { ok: false; errors: RentalErrors } {
+): { ok: true; payload: RentalPayload } | { ok: false; errors: RentalErrors } {
   const errors: RentalErrors = {};
 
   const address = draft.address.trim();

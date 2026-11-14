@@ -8,6 +8,7 @@ const VARIANT: Record<RentalStatus, "default" | "secondary" | "destructive"> = {
   active: "default",
   moved_out: "secondary",
   deposit_overdue: "destructive",
+  deposit_returned: "secondary",
 };
 
 export function RentalStatusBadge({ status }: { status: RentalStatus }) {

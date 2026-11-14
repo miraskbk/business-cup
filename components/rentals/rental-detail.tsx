@@ -10,6 +10,7 @@ import { rentalStatus } from "@/lib/rental-status";
 import type { Rental } from "@/lib/types";
 import { stateName } from "@/lib/us-states";
 import { InspectionChecklist } from "@/components/inspection/inspection-checklist";
+import { MoveOutTab } from "@/components/move-out/move-out-tab";
 import { DeleteRentalDialog } from "@/components/rentals/delete-rental-dialog";
 import { RentalFormDialog } from "@/components/rentals/rental-form-dialog";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
@@ -17,8 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const UUID =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type LoadState =
   | { kind: "loading" }
@@ -112,12 +112,17 @@ export function RentalDetail() {
               <TabsTrigger value="renewal" disabled>
                 Renewal
               </TabsTrigger>
-              <TabsTrigger value="move-out" disabled>
-                Move-out
-              </TabsTrigger>
+              <TabsTrigger value="move-out">Move-out</TabsTrigger>
             </TabsList>
             <TabsContent value="move-in" className="mt-4">
               <InspectionChecklist rental={state.rental} phase="move_in" />
+            </TabsContent>
+            <TabsContent value="move-out" className="mt-4">
+              <MoveOutTab
+                rental={state.rental}
+                onEdit={() => setEditOpen(true)}
+                onSaved={(rental) => setState({ kind: "ready", rental })}
+              />
             </TabsContent>
           </Tabs>
         </>

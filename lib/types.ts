@@ -17,6 +17,8 @@ export type Rental = {
   lease_end: ISODate | null;
   /** Set once the renter has moved out (or knows the date). */
   move_out_date: ISODate | null;
+  /** Set when the renter confirms the deposit has been returned/resolved. */
+  deposit_returned_at: ISODate | null;
   created_at: string;
 };
 
