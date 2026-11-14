@@ -10,9 +10,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Deposit Back",
+  title: "safer | Your rental, on record",
   description:
-    "Record your rental's condition and get your full security deposit back.",
+    "Keep rental evidence, lease events, and deposit deadlines together. A private web workspace for renters.",
 };
 
 const geistSans = Geist({
@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={`${geistSans.className} antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

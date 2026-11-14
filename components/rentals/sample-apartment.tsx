@@ -87,7 +87,15 @@ export function SampleApartment() {
     if (!pending.current) pending.current = seed();
     pending.current
       .then((id) => {
-        if (active) router.replace(`/protected/rentals/${id}`);
+        if (active) {
+          const view = new URLSearchParams(window.location.search).get("view");
+          const suffix =
+            view &&
+            ["move-in", "lease-log", "renewal", "move-out"].includes(view)
+              ? `?view=${view}`
+              : "";
+          router.replace(`/protected/rentals/${id}${suffix}`);
+        }
       })
       .catch((err) => {
         if (active)

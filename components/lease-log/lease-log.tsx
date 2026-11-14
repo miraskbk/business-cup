@@ -193,7 +193,10 @@ export function LeaseLog({ rental }: { rental: Rental }) {
     <section className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold">Your lease timeline</h2>
+          <p className="page-eyebrow mb-3">02 / During the lease</p>
+          <h2 className="text-2xl font-medium tracking-tight">
+            Your lease timeline
+          </h2>
           <p className="max-w-xl text-sm text-muted-foreground">
             Keep repair requests, promises, notices, and payments in one place,
             with dates you can refer back to.
@@ -229,25 +232,25 @@ export function LeaseLog({ rental }: { rental: Rental }) {
           </Button>
         </div>
       ) : (
-        <ol className="space-y-4 border-l-2 border-muted pl-4 sm:pl-6">
+        <ol className="space-y-6 rounded-xl border bg-card p-6 pl-10">
           {rows.map((row) => {
             const status = eventStatus(row, today);
             return (
               <li
                 key={row.id}
                 data-lease-event={row.id}
-                className="relative space-y-3 rounded-lg border p-4"
+                className="relative space-y-3 border-b pb-6 last:border-0 last:pb-0"
               >
                 <span
-                  className="absolute -left-[23px] top-6 size-3 rounded-full border-2 border-background bg-secondary sm:-left-[31px]"
+                  className="absolute -left-6 top-1 size-2 rounded-full bg-primary/45"
                   aria-hidden
                 />
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {EVENT_KIND_LABEL[row.kind]}
-                      </Badge>
+                      </span>
                       <Badge
                         variant={
                           status === "overdue"

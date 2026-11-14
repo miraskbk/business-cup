@@ -72,166 +72,205 @@ export function RenewalCalculator({ rental }: { rental: Rental }) {
       ]
     : [];
 
+  function field(key: keyof RenewalInput) {
+    const { label, help } = FIELDS.find((entry) => entry.key === key)!;
+    const error =
+      !validated.ok && draft[key] !== "" ? validated.errors[key] : undefined;
+    return (
+      <div
+        key={key}
+        className={`flex flex-col gap-2 ${key === "overlapDays" ? "sm:col-span-2" : ""}`}
+      >
+        <Label htmlFor={`renewal-${key}`} className="text-xs leading-5">
+          {label}
+        </Label>
+        <Input
+          id={`renewal-${key}`}
+          inputMode={key === "overlapDays" ? "numeric" : "decimal"}
+          value={draft[key]}
+          onChange={(e) =>
+            setDraft((prev) => ({ ...prev, [key]: e.target.value }))
+          }
+          aria-invalid={!!error}
+          aria-describedby={
+            error
+              ? `renewal-${key}-error`
+              : help
+                ? `renewal-${key}-help`
+                : undefined
+          }
+          className="bg-background/40 tabular-nums"
+        />
+        {help && (
+          <p
+            id={`renewal-${key}-help`}
+            className="text-[11px] leading-4 text-muted-foreground"
+          >
+            {help}
+          </p>
+        )}
+        {error && (
+          <p id={`renewal-${key}-error`} className="text-xs text-destructive">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <section className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold">Stay, negotiate, or move?</h2>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Compare the next 12 months using your own estimates. Enter the renewal
-          offer and a comparable apartment to see what moving would really cost.
+      <div className="space-y-1.5">
+        <p className="page-eyebrow">03 / Renewal</p>
+        <h2 className="text-2xl font-medium tracking-tight">
+          What does your next year cost?
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Compare a renewal offer with negotiating or moving. Adjust the
+          estimates below.
         </p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-        <div className="grid gap-4 rounded-lg border p-4 sm:grid-cols-2 sm:p-5">
-          {FIELDS.map(({ key, label, help }) => {
-            const error = !validated.ok ? validated.errors[key] : undefined;
-            return (
+      <div aria-live="polite" aria-atomic="true">
+        {!result ? (
+          <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
+            Complete the amounts below to see your comparison.
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {plans.map((plan) => (
               <div
-                key={key}
-                className={`flex flex-col gap-2 ${key === "overlapDays" ? "sm:col-span-2" : ""}`}
+                key={plan.key}
+                data-renewal-plan={plan.key}
+                className="rounded-xl border bg-card p-5"
               >
-                <Label htmlFor={`renewal-${key}`}>{label}</Label>
-                <Input
-                  id={`renewal-${key}`}
-                  inputMode={key === "overlapDays" ? "numeric" : "decimal"}
-                  value={draft[key]}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, [key]: e.target.value }))
-                  }
-                  aria-invalid={!!error}
-                  aria-describedby={
-                    error
-                      ? `renewal-${key}-error`
-                      : help
-                        ? `renewal-${key}-help`
-                        : undefined
-                  }
-                />
-                {help && (
-                  <p
-                    id={`renewal-${key}-help`}
-                    className="text-xs text-muted-foreground"
-                  >
-                    {help}
-                  </p>
-                )}
-                {error && (
-                  <p
-                    id={`renewal-${key}-error`}
-                    className="text-sm text-destructive"
-                  >
-                    {error}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <div className="space-y-4" aria-live="polite" aria-atomic="true">
-          {!result ? (
-            <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-              Complete the amounts on the left to see your comparison.
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {plans.map((plan) => (
-                  <div
-                    key={plan.key}
-                    data-renewal-plan={plan.key}
-                    className="rounded-lg border p-4"
-                  >
-                    <p className="text-sm font-medium">{plan.label}</p>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums">
-                      {formatMoney(plan.amount)}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {plan.detail}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div
-                className="space-y-2 rounded-lg bg-muted/50 p-4 text-sm"
-                data-renewal-break-even
-              >
-                <p className="font-semibold">
-                  {result.breakEvenMonths === null
-                    ? "Moving doesn't lower the monthly rent"
-                    : result.breakEvenMonths === 0
-                      ? "No moving costs to recover"
-                      : `Moving breaks even in ${result.breakEvenMonths} ${result.breakEvenMonths === 1 ? "month" : "months"}`}
+                <p className="text-xs font-medium text-muted-foreground">
+                  {plan.label}
                 </p>
-                <p className="text-muted-foreground">
-                  {result.monthlySavingsVsStay > 0
-                    ? `${formatMoney(result.monthlySavingsVsStay)} lower monthly rent compared with accepting renewal, covering ${formatMoney(result.oneTimeMovingCost)} in moving and overlap costs.`
-                    : "Moving costs won't be recovered through lower rent compared with this renewal offer."}
+                <p className="mt-3 text-[28px] font-medium tracking-tight text-primary tabular-nums">
+                  {formatMoney(plan.amount)}
                 </p>
-                {result.breakEvenMonths !== null &&
-                  result.breakEvenMonths > 12 && (
-                    <p className="text-muted-foreground">
-                      Break-even falls beyond this 12-month comparison.
-                    </p>
-                  )}
-                <p className="text-muted-foreground">
-                  Negotiating to your target would{" "}
-                  {result.negotiateSavingsVsStay >= 0
-                    ? "save"
-                    : "cost an extra"}{" "}
-                  {formatMoney(Math.abs(result.negotiateSavingsVsStay))} over 12
-                  months compared with the renewal offer.
+                <p className="mt-2 text-[11px] leading-5 text-muted-foreground">
+                  {plan.detail}
                 </p>
               </div>
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grid gap-5 xl:grid-cols-2">
+        <section className="space-y-5 rounded-xl border bg-card p-5">
+          <div>
+            <h3 className="text-sm font-semibold">Monthly rent</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Compare the offer with your alternatives.
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {(
+              [
+                "currentRent",
+                "proposedRent",
+                "negotiatedRent",
+                "comparableRent",
+              ] as const
+            ).map(field)}
+          </div>
+        </section>
+        <section className="space-y-5 rounded-xl border bg-card p-5">
+          <div>
+            <h3 className="text-sm font-semibold">The cost of moving</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Include the expenses that are easy to overlook.
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {(["movingCosts", "newDeposit", "overlapDays"] as const).map(field)}
+          </div>
+        </section>
       </div>
       {result && (
-        <div className="space-y-3 rounded-lg border p-4 sm:p-5">
-          <h3 className="font-semibold">Plan for the cash you need</h3>
-          <dl className="grid gap-4 sm:grid-cols-3">
+        <>
+          <div
+            className="grid gap-6 rounded-xl bg-secondary/55 p-5 text-sm lg:grid-cols-[1.1fr_1fr]"
+            data-renewal-break-even
+          >
             <div>
-              <dt className="text-sm text-muted-foreground">
-                Cash needed to move
-              </dt>
-              <dd className="text-xl font-semibold" data-renewal-upfront>
-                {formatMoney(result.upfrontMoveCash)}
-              </dd>
-              <p className="text-xs text-muted-foreground">
-                First month + new deposit + moving + overlap
+              <p className="font-semibold">
+                {result.breakEvenMonths === null
+                  ? "Moving doesn't lower the monthly rent"
+                  : result.breakEvenMonths === 0
+                    ? "No moving costs to recover"
+                    : `Moving breaks even in ${result.breakEvenMonths} ${result.breakEvenMonths === 1 ? "month" : "months"}`}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                {result.monthlySavingsVsStay > 0
+                  ? `${formatMoney(result.monthlySavingsVsStay)} lower monthly rent compared with accepting renewal covers ${formatMoney(result.oneTimeMovingCost)} in moving and overlap costs.`
+                  : "Moving costs won't be recovered through lower rent compared with this renewal offer."}
+                {result.breakEvenMonths !== null &&
+                  result.breakEvenMonths > 12 &&
+                  " Break-even falls beyond this 12-month comparison."}
               </p>
             </div>
-            <div>
-              <dt className="text-sm text-muted-foreground">
-                Refundable new deposit
-              </dt>
-              <dd className="text-xl font-semibold">
-                {formatMoney(result.newDeposit)}
-              </dd>
-              <p className="text-xs text-muted-foreground">
-                Cash tied up, excluded from the cost comparison
+            <p className="text-xs leading-5 text-muted-foreground">
+              Negotiating to your target would{" "}
+              {result.negotiateSavingsVsStay >= 0 ? "save" : "cost an extra"}{" "}
+              <span className="font-medium text-foreground">
+                {formatMoney(Math.abs(result.negotiateSavingsVsStay))}
+              </span>{" "}
+              over 12 months compared with the renewal offer. Your landlord
+              would need to agree to that rent.
+            </p>
+          </div>
+          <details className="group rounded-xl border bg-card">
+            <summary className="px-5 py-4 text-sm font-medium">
+              Cash needed &amp; assumptions{" "}
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                Refundable deposits are cash tied up, not an expense.
+              </span>
+            </summary>
+            <div className="space-y-4 border-t p-5">
+              <dl className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    Cash needed to move
+                  </dt>
+                  <dd className="mt-2 text-xl font-medium" data-renewal-upfront>
+                    {formatMoney(result.upfrontMoveCash)}
+                  </dd>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    First month + deposit + moving + overlap
+                  </p>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    Refundable new deposit
+                  </dt>
+                  <dd className="mt-2 text-xl font-medium">
+                    {formatMoney(result.newDeposit)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    12-month cash outflow if you move
+                  </dt>
+                  <dd className="mt-2 text-xl font-medium">
+                    {formatMoney(result.moveCashOver12Months)}
+                  </dd>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Includes the new deposit, before any old-deposit refund
+                  </p>
+                </div>
+              </dl>
+              <p className="text-[11px] leading-5 text-muted-foreground">
+                Overlap rent: {formatMoney(result.overlapCost)}, using current
+                rent divided by 30. Assumes flat rent for 12 months and a fully
+                refundable new deposit. Utilities, insurance, financing costs,
+                and the timing of your old deposit refund aren&apos;t included. Add
+                other fees to moving costs.
               </p>
             </div>
-            <div>
-              <dt className="text-sm text-muted-foreground">
-                12-month cash outflow if you move
-              </dt>
-              <dd className="text-xl font-semibold">
-                {formatMoney(result.moveCashOver12Months)}
-              </dd>
-              <p className="text-xs text-muted-foreground">
-                Includes the new deposit; excludes any old-deposit refund
-              </p>
-            </div>
-          </dl>
-          <p className="text-xs text-muted-foreground">
-            Overlap rent: {formatMoney(result.overlapCost)}. Assumes flat rent
-            for 12 months and a fully refundable new deposit. Utilities,
-            insurance, financing costs, and the timing of your old deposit
-            refund aren&apos;t included. Update moving costs to include any
-            other fees.
-          </p>
-        </div>
+          </details>
+        </>
       )}
     </section>
   );

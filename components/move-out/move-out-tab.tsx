@@ -20,6 +20,7 @@ import { DemandLetter } from "@/components/move-out/demand-letter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -97,12 +98,24 @@ export function MoveOutTab({
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1.5">
+          <p className="page-eyebrow">04 / Move-out</p>
+          <h2 className="text-2xl font-medium tracking-tight">
+            Your record. Your next step.
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Compare the condition, review the charges, and put it in writing.
+          </p>
+        </div>
+        <DemandLetter rental={rental} today={today} compact />
+      </div>
       <section
-        className={`space-y-4 rounded-lg border p-4 sm:p-5 ${late && !returned ? "border-destructive/50 bg-destructive/5" : "bg-muted/20"}`}
+        className={`space-y-4 rounded-xl border bg-card p-5 ${late && !returned ? "border-destructive/25" : ""}`}
       >
         <div className="flex items-start gap-3">
           {returned ? (
-            <CheckCircle2 className="mt-1 size-5 shrink-0 text-secondary" />
+            <CheckCircle2 className="mt-1 size-5 shrink-0 text-primary" />
           ) : late ? (
             <AlertTriangle className="mt-1 size-5 shrink-0 text-destructive" />
           ) : (
@@ -154,35 +167,38 @@ export function MoveOutTab({
                         ? `The response deadline is today, ${formatDate(deadline!)}.`
                         : `Your landlord has ${remaining} ${remaining === 1 ? "day" : "days"} left, until ${formatDate(deadline!)}.`}
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  {rule.deadlineSummary}
-                </p>
-                {late && <p className="text-sm">{rule.penaltySummary}</p>}
               </>
             )}
           </div>
         </div>
         {rule && !returned && (
-          <div className="space-y-2 border-t pt-3 text-sm">
-            {rule.renterDuty && (
-              <p>
-                <span className="font-medium">Your part: </span>
-                {rule.renterDuty}
+          <details className="rounded-lg bg-muted/40 px-3 py-2 text-sm">
+            <summary className="w-fit text-xs font-medium text-muted-foreground">
+              State rule &amp; official source
+            </summary>
+            <div className="mt-3 space-y-2 pb-1 text-sm">
+              <p className="text-muted-foreground">{rule.deadlineSummary}</p>
+              {late && <p>{rule.penaltySummary}</p>}
+              {rule.renterDuty && (
+                <p>
+                  <span className="font-medium">Your part: </span>
+                  {rule.renterDuty}
+                </p>
+              )}
+              <a
+                href={rule.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-primary underline underline-offset-4"
+              >
+                {rule.statuteCitation} · Official source
+              </a>
+              <p className="text-xs text-muted-foreground">
+                General information. Local rules and special housing types may
+                differ. This tracker does not check what your landlord has sent.
               </p>
-            )}
-            <a
-              href={rule.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block text-primary underline underline-offset-4"
-            >
-              {rule.statuteCitation} · Official source
-            </a>
-            <p className="text-xs text-muted-foreground">
-              General information. Local rules and special housing types may
-              differ. This tracker does not check what your landlord has sent.
-            </p>
-          </div>
+            </div>
+          </details>
         )}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onEdit}>
@@ -202,6 +218,7 @@ export function MoveOutTab({
             !future && (
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => {
                   setReturnedOn(today);
                   setDateError(null);
@@ -215,9 +232,21 @@ export function MoveOutTab({
         </div>
       </section>
 
-      <DeductionsList rental={rental} />
-      <DemandLetter rental={rental} today={today} />
-      <InspectionChecklist rental={rental} phase="move_out" />
+      <Tabs defaultValue="evidence">
+        <TabsList
+          className="section-tabs h-auto bg-card"
+          aria-label="Move-out tasks"
+        >
+          <TabsTrigger value="evidence">Compare evidence</TabsTrigger>
+          <TabsTrigger value="deductions">Review deductions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="evidence" className="mt-5">
+          <InspectionChecklist rental={rental} phase="move_out" />
+        </TabsContent>
+        <TabsContent value="deductions" className="mt-5">
+          <DeductionsList rental={rental} />
+        </TabsContent>
+      </Tabs>
 
       <Dialog
         open={returnOpen}

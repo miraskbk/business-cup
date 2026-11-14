@@ -58,9 +58,11 @@ function preloadPhoto(url: string): Promise<void> {
 export function DemandLetter({
   rental,
   today,
+  compact = false,
 }: {
   rental: Rental;
   today: string;
+  compact?: boolean;
 }) {
   const [supabase] = useState(() => createClient());
   const [open, setOpen] = useState(false);
@@ -214,9 +216,13 @@ export function DemandLetter({
   }
 
   return (
-    <section className="space-y-3 rounded-lg border p-4 sm:p-5">
+    <section
+      className={
+        compact ? "space-y-2" : "space-y-3 rounded-lg border bg-card p-4 sm:p-5"
+      }
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="max-w-xl space-y-1">
+        <div className={compact ? "sr-only" : "max-w-xl space-y-1"}>
           <h2 className="text-lg font-semibold">Make your case in writing</h2>
           <p className="text-sm text-muted-foreground">
             Turn your rental details, disputed charges, and timestamped evidence

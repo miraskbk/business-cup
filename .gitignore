@@ -44,3 +44,9 @@ next-env.d.ts
 
 # supabase cli local state
 supabase/.temp
+
+# Safe template for local setup
+!.env.example
+
+# Local pitch build intermediates
+.pitch-build/

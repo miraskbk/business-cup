@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { MoreHorizontal, Plus } from "lucide-react";
+import {
+  MoreHorizontal,
+  Plus,
+  ArrowUpRight,
+  House,
+  ShieldCheck,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate, formatMoney, todayISO } from "@/lib/format";
 import { rentalStatus } from "@/lib/rental-status";
@@ -66,12 +72,15 @@ export default function RentalsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+      <div className="flex flex-wrap items-end justify-between gap-5 border-b pb-8">
         <div>
-          <h1 className="text-2xl font-bold">My rentals</h1>
-          <p className="text-sm text-muted-foreground">
-            Each rental keeps its own evidence, deadlines and deductions.
+          <p className="page-eyebrow mb-3">Your workspace</p>
+          <h1 className="text-4xl font-medium tracking-[-0.04em]">
+            My rentals
+          </h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            A clear record for every place you call home.
           </p>
         </div>
         <Button onClick={openCreate}>
@@ -79,6 +88,31 @@ export default function RentalsPage() {
           New rental
         </Button>
       </div>
+
+      {!loading && !loadError && rentals.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+          <p className="flex items-center gap-2 text-muted-foreground">
+            <ShieldCheck className="size-4 text-primary" />
+            <span className="font-medium text-foreground">
+              {formatMoney(
+                rentals.reduce(
+                  (total, rental) => total + rental.deposit_amount,
+                  0,
+                ),
+              )}
+            </span>{" "}
+            in deposits tracked across {rentals.length}{" "}
+            {rentals.length === 1 ? "rental" : "rentals"}
+          </p>
+          <Link
+            href="/protected/sample"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            Explore the sample
+            <ArrowUpRight className="size-3" />
+          </Link>
+        </div>
+      )}
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -94,16 +128,31 @@ export default function RentalsPage() {
           </Button>
         </div>
       ) : rentals.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center">
+        <div className="rounded-2xl border bg-card px-8 py-16 text-center">
+          <span className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-secondary">
+            <House
+              className="size-6 text-secondary-foreground"
+              strokeWidth={1.5}
+            />
+          </span>
           <p className="font-medium">No rentals yet</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
             Add the place you rent to start recording its condition and tracking
             your deposit.
           </p>
-          <Button className="mt-4" onClick={openCreate}>
+          <Button className="mt-6" onClick={openCreate}>
             <Plus />
             Add your first rental
           </Button>
+          <p className="mt-5 text-xs text-muted-foreground">
+            Want to see how it works first?{" "}
+            <Link
+              href="/protected/sample"
+              className="font-medium text-primary underline underline-offset-4"
+            >
+              Try a sample apartment
+            </Link>
+          </p>
         </div>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
@@ -151,10 +200,13 @@ function RentalCard({
 
   return (
     // The title link is stretched over the whole card; the menu sits above it.
-    <Card className="relative h-full transition-colors hover:border-foreground/30">
+    <Card className="group relative h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
       <CardHeader className="flex-row items-start justify-between gap-3 space-y-0 pb-3">
         <div className="min-w-0 space-y-1">
-          <CardTitle className="text-base leading-snug">
+          <span className="mb-4 flex size-10 items-center justify-center rounded-lg bg-secondary/60 text-primary">
+            <House className="size-5" strokeWidth={1.5} />
+          </span>
+          <CardTitle className="text-lg font-medium leading-snug">
             <Link
               href={`/protected/rentals/${rental.id}`}
               className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
@@ -188,14 +240,14 @@ function RentalCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-5">
         <div className="flex flex-wrap gap-2">
           <RentalStatusBadge status={status} />
           {rental.is_sample && (
             <Badge variant="outline">Sample apartment</Badge>
           )}
         </div>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 border-t pt-4 text-sm">
           <dt className="text-muted-foreground">Deposit</dt>
           <dd className="text-right font-medium">
             {formatMoney(rental.deposit_amount)}
@@ -214,6 +266,10 @@ function RentalCard({
             </>
           ) : null}
         </dl>
+        <p className="flex items-center justify-between border-t pt-4 text-xs font-medium text-primary">
+          Open rental workspace
+          <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </p>
       </CardContent>
     </Card>
   );

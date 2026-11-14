@@ -158,7 +158,7 @@ export function DeductionsList({ rental }: { rental: Rental }) {
     );
 
   return (
-    <section className="space-y-4 rounded-lg border p-4 sm:p-5">
+    <section className="space-y-4 rounded-xl border bg-card p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Landlord deductions</h2>
