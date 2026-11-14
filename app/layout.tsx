@@ -4,9 +4,12 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+// Link previews must point at the public production address. A single
+// deployment's own URL (VERCEL_URL) sits behind Vercel's login, so chat apps
+// fetching the preview image from it get a redirect instead of a picture.
+const siteHost =
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
+const defaultUrl = siteHost ? `https://${siteHost}` : "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
