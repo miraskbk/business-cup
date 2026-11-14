@@ -2,7 +2,7 @@
 
 A web workspace that helps renters keep a record and make a clear case for their security deposit.
 
-[Live app](https://business-cup-xi.vercel.app) · [Try the sample apartment](https://business-cup-xi.vercel.app/protected/sample)
+[Live app](https://business-cup-xi.vercel.app) · [Try the sample apartment](https://business-cup-xi.vercel.app/protected/sample) · [Pitch deck](output/pdf/safer-pitch.pdf)
 
 ## What it does
 
