@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { AuthButton } from "@/components/auth-button";
+import { SampleLink } from "@/components/rentals/sample-link";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ShieldCheck, ArrowUpRight } from "lucide-react";
 
@@ -34,14 +35,12 @@ export function Navbar({ minimal = false }: { minimal?: boolean }) {
         <div className="flex items-center gap-3 sm:gap-5">
           {!minimal && (
             <>
-              <Link
-                href="/protected/sample"
-                prefetch={false}
+              <SampleLink
                 className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
                 Explore demo
                 <ArrowUpRight className="size-3.5" />
-              </Link>
+              </SampleLink>
               <span className="h-5 border-l" aria-hidden />
             </>
           )}

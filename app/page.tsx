@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { SampleLink } from "@/components/rentals/sample-link";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -24,13 +25,11 @@ export default function Home() {
               <ArrowRight />
             </Link>
           </Button>
-          <Link
-            href="/protected/sample"
-            prefetch={false}
+          <SampleLink
             className="rounded-sm py-2 text-sm font-medium text-foreground underline decoration-border underline-offset-[6px] transition-colors hover:text-primary hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
           >
             Explore a sample apartment
-          </Link>
+          </SampleLink>
         </div>
         <p className="mt-7 text-xs text-muted-foreground">
           No sign-up needed. Your workspace stays private.

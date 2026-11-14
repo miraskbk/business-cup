@@ -17,6 +17,7 @@ import { stateName } from "@/lib/us-states";
 import { DeleteRentalDialog } from "@/components/rentals/delete-rental-dialog";
 import { RentalFormDialog } from "@/components/rentals/rental-form-dialog";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
+import { SampleLink } from "@/components/rentals/sample-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -114,13 +115,10 @@ export default function RentalsPage() {
               "This is the fictional sample. Add your own rental to track a real deposit."
             )}
           </p>
-          <Link
-            href="/protected/sample"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
+          <SampleLink className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
             Explore the sample
             <ArrowUpRight className="size-3" />
-          </Link>
+          </SampleLink>
         </div>
       )}
 
@@ -156,12 +154,9 @@ export default function RentalsPage() {
           </Button>
           <p className="mt-5 text-xs text-muted-foreground">
             Want to see how it works first?{" "}
-            <Link
-              href="/protected/sample"
-              className="font-medium text-primary underline underline-offset-4"
-            >
+            <SampleLink className="font-medium text-primary underline underline-offset-4">
               Try a sample apartment
-            </Link>
+            </SampleLink>
           </p>
         </div>
       ) : (

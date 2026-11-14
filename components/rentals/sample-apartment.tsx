@@ -8,18 +8,25 @@ import { createClient } from "@/lib/supabase/client";
 import { todayISO } from "@/lib/format";
 import { toEvidenceJpeg } from "@/lib/image";
 import { buildSampleApartment, SAMPLE_PHOTOS } from "@/lib/sample-apartment";
+import { takeSampleIntent } from "@/components/rentals/sample-link";
 import { Button } from "@/components/ui/button";
 
 export function SampleApartment() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
-  const pending = useRef<Promise<string> | null>(null);
+  const pending = useRef<Promise<string | null> | null>(null);
+  // Creating the sample writes rows and photos, so it needs a click: either
+  // on a link that led here or on the button below. Loading the URL alone,
+  // as a crawler does, only reopens a sample that already exists.
+  const confirmed = useRef(false);
   const [attempt, setAttempt] = useState(0);
+  const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    async function seed(): Promise<string> {
+    if (takeSampleIntent()) confirmed.current = true;
+    async function seed(): Promise<string | null> {
       const { data: auth, error: authError } = await supabase.auth.getUser();
       if (authError || !auth.user)
         throw new Error(
@@ -32,6 +39,7 @@ export function SampleApartment() {
         .maybeSingle();
       if (lookupError) throw new Error(lookupError.message);
       if (existing) return existing.id;
+      if (!confirmed.current) return null;
       const fixture = buildSampleApartment(auth.user.id, todayISO(), () =>
         crypto.randomUUID(),
       );
@@ -87,7 +95,9 @@ export function SampleApartment() {
     if (!pending.current) pending.current = seed();
     pending.current
       .then((id) => {
-        if (active) {
+        if (active && id === null) {
+          setAsking(true);
+        } else if (active) {
           const view = new URLSearchParams(window.location.search).get("view");
           const suffix =
             view &&
@@ -125,6 +135,29 @@ export function SampleApartment() {
               }}
             >
               Try again
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/protected">My rentals</Link>
+            </Button>
+          </div>
+        </>
+      ) : asking ? (
+        <>
+          <h1 className="text-xl font-semibold">Explore a sample apartment</h1>
+          <p className="text-sm text-muted-foreground">
+            A fictional rental with sample photos, lease events, and a disputed
+            $300 deduction, saved in your own private guest session.
+          </p>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                confirmed.current = true;
+                pending.current = null;
+                setAsking(false);
+                setAttempt((prev) => prev + 1);
+              }}
+            >
+              Open the sample
             </Button>
             <Button asChild variant="outline">
               <Link href="/protected">My rentals</Link>
