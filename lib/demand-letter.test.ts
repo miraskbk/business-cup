@@ -161,6 +161,12 @@ describe("demand letter", () => {
       );
     }
   });
+  it("reads a refund typed with a dollar sign and commas", () => {
+    const typed = generateDemandLetter({ ...input, refundedAmount: "$1,500" });
+    const plain = generateDemandLetter({ ...input, refundedAmount: "1500" });
+    assert.ok(typed.ok && plain.ok);
+    assert.equal(typed.amountRequested, plain.amountRequested);
+  });
   it("refuses payment demands with no balance left", () => {
     assert.equal(
       generateDemandLetter({ ...input, refundedAmount: "1800" }).ok,

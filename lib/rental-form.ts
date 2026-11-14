@@ -1,3 +1,4 @@
+import { parseMoney } from "./money.ts";
 import type { Rental } from "./types.ts";
 import { US_STATES } from "./us-states.ts";
 
@@ -48,17 +49,7 @@ export function draftFromRental(rental: Rental): RentalDraft {
   };
 }
 
-// numeric(10,2) holds up to 99,999,999.99
-const MAX_AMOUNT = 99_999_999.99;
-const MONEY = /^\d+(\.\d{1,2})?$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function parseMoney(raw: string): number | null {
-  const value = raw.trim().replace(/[$,]/g, "");
-  if (!MONEY.test(value)) return null;
-  const amount = Number(value);
-  return amount <= MAX_AMOUNT ? amount : null;
-}
 
 /**
  * Checks a draft and, when it is valid, returns the row to save.

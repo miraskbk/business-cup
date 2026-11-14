@@ -1,5 +1,6 @@
 import { addDays } from "./deposit-rules.ts";
 import { evidencePhotoPath, PRESET_ROOMS } from "./inspection.ts";
+import type { RenewalDraft } from "./renewal.ts";
 import type {
   Deduction,
   InspectionItem,
@@ -12,6 +13,20 @@ export const SAMPLE_PHOTOS = {
   move_in: "/samples/countertop-move-in.jpg",
   move_out: "/samples/countertop-move-out.jpg",
 } as const;
+
+/**
+ * A fictional renewal offer for the sample, so its calculator opens on three
+ * different outcomes instead of three copies of the current rent.
+ */
+export const SAMPLE_RENEWAL: RenewalDraft = {
+  currentRent: "1800",
+  proposedRent: "1950",
+  negotiatedRent: "1875",
+  comparableRent: "1750",
+  movingCosts: "1400",
+  newDeposit: "1750",
+  overlapDays: "7",
+};
 
 /** Inject ids and today's date so the fixture is testable, with no clock I/O. */
 export function buildSampleApartment(

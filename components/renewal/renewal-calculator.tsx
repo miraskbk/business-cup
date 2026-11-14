@@ -8,6 +8,7 @@ import {
   type RenewalInput,
 } from "@/lib/renewal";
 import { formatMoney } from "@/lib/format";
+import { SAMPLE_RENEWAL } from "@/lib/sample-apartment";
 import type { Rental } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,7 @@ const FIELDS: { key: keyof RenewalInput; label: string; help?: string }[] = [
 
 export function RenewalCalculator({ rental }: { rental: Rental }) {
   const [draft, setDraft] = useState<RenewalDraft>(() => {
+    if (rental.is_sample) return SAMPLE_RENEWAL;
     const rent = rental.monthly_rent;
     return {
       currentRent: rent === null ? "" : String(rent),
@@ -128,6 +130,7 @@ export function RenewalCalculator({ rental }: { rental: Rental }) {
         <p className="text-sm text-muted-foreground">
           Compare a renewal offer with negotiating or moving. Adjust the
           estimates below.
+          {rental.is_sample && " These starting numbers are fictional."}
         </p>
       </div>
       <div aria-live="polite" aria-atomic="true">

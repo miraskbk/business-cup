@@ -11,7 +11,7 @@ import {
   isLate,
   ruleFor,
 } from "@/lib/deposit-rules";
-import { formatDate, todayISO } from "@/lib/format";
+import { formatDate, formatDays, todayISO } from "@/lib/format";
 import type { Rental } from "@/lib/types";
 import { stateName } from "@/lib/us-states";
 import { InspectionChecklist } from "@/components/inspection/inspection-checklist";
@@ -135,7 +135,7 @@ export function MoveOutTab({
                   : !rule
                     ? "More states coming soon"
                     : future
-                      ? `Move-out in ${-day!} days`
+                      ? `Move-out in ${formatDays(-day!)}`
                       : late
                         ? `Day ${day} — response overdue`
                         : `Day ${day} of ${rule.returnDeadlineDays}`}
@@ -162,10 +162,10 @@ export function MoveOutTab({
                   {future
                     ? `Expected response deadline: ${formatDate(deadline!)}.`
                     : late
-                      ? `The ${formatDate(deadline!)} deadline passed ${-remaining!} days ago. If no refund or required deduction statement arrived, your landlord is late.`
+                      ? `The ${formatDate(deadline!)} deadline passed ${formatDays(-remaining!)} ago. If no refund or required deduction statement arrived, your landlord is late.`
                       : remaining === 0
                         ? `The response deadline is today, ${formatDate(deadline!)}.`
-                        : `Your landlord has ${remaining} ${remaining === 1 ? "day" : "days"} left, until ${formatDate(deadline!)}.`}
+                        : `Your landlord has ${formatDays(remaining!)} left, until ${formatDate(deadline!)}.`}
                 </p>
               </>
             )}

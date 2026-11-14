@@ -1,6 +1,7 @@
 import { deadlineFor, ruleFor } from "./deposit-rules.ts";
 import { formatDate, formatDateTime, formatMoney } from "./format.ts";
 import { CONDITION_LABEL, PHASE_LABEL } from "./inspection.ts";
+import { parseMoney } from "./money.ts";
 import type { Deduction, InspectionItem, ISODate, Rental } from "./types.ts";
 
 export type LetterDetails = {
@@ -39,18 +40,12 @@ export function generateDemandLetter(input: LetterInput): LetterResult {
   const errors: LetterErrors = {};
   const name = input.senderName.trim();
   const address = input.forwardingAddress.trim();
-  const rawRefund = input.refundedAmount.trim();
-  const refunded = Number(rawRefund);
+  const refunded = parseMoney(input.refundedAmount);
   if (!name) errors.senderName = "Enter your name for the signature.";
   if (!address)
     errors.forwardingAddress =
       "Enter an address where you can receive the refund.";
-  if (
-    !/^\d+(\.\d{1,2})?$/.test(rawRefund) ||
-    !Number.isFinite(refunded) ||
-    refunded < 0 ||
-    refunded > rental.deposit_amount
-  ) {
+  if (refunded === null || refunded > rental.deposit_amount) {
     errors.refundedAmount =
       "Enter a refund from $0 up to the original deposit, with up to two decimal places.";
   }
@@ -61,7 +56,8 @@ export function generateDemandLetter(input: LetterInput): LetterResult {
     errors.rental =
       "This deposit is marked resolved. Reopen tracking if you still need to request a refund.";
   }
-  if (Object.keys(errors).length) return { ok: false, errors };
+  if (refunded === null || Object.keys(errors).length)
+    return { ok: false, errors };
 
   // Only this rental's rows belong in its letter, even if callers pass more.
   const deductions = input.deductions.filter(

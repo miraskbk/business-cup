@@ -37,6 +37,11 @@ export function formatDate(date: ISODate): string {
   return day.format(new Date(Date.UTC(year, month - 1, dayOfMonth)));
 }
 
+/** "1 day", "2 days". */
+export function formatDays(count: number): string {
+  return `${count} ${count === 1 ? "day" : "days"}`;
+}
+
 /** Today's calendar date where the user is, as "YYYY-MM-DD". */
 export function todayISO(now: Date = new Date()): ISODate {
   const year = now.getFullYear();

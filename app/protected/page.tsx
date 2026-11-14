@@ -71,6 +71,15 @@ export default function RentalsPage() {
     );
   }
 
+  // The sample apartment is fictional, so its deposit isn't money being
+  // tracked. Summed in cents so the total never picks up float noise.
+  const ownRentals = rentals.filter((rental) => !rental.is_sample);
+  const ownDeposits =
+    ownRentals.reduce(
+      (cents, rental) => cents + Math.round(rental.deposit_amount * 100),
+      0,
+    ) / 100;
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-5 border-b pb-8">
@@ -93,16 +102,17 @@ export default function RentalsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <p className="flex items-center gap-2 text-muted-foreground">
             <ShieldCheck className="size-4 text-primary" />
-            <span className="font-medium text-foreground">
-              {formatMoney(
-                rentals.reduce(
-                  (total, rental) => total + rental.deposit_amount,
-                  0,
-                ),
-              )}
-            </span>{" "}
-            in deposits tracked across {rentals.length}{" "}
-            {rentals.length === 1 ? "rental" : "rentals"}
+            {ownRentals.length > 0 ? (
+              <>
+                <span className="font-medium text-foreground">
+                  {formatMoney(ownDeposits)}
+                </span>{" "}
+                in deposits tracked across {ownRentals.length}{" "}
+                {ownRentals.length === 1 ? "rental" : "rentals"}
+              </>
+            ) : (
+              "This is the fictional sample. Add your own rental to track a real deposit."
+            )}
           </p>
           <Link
             href="/protected/sample"
