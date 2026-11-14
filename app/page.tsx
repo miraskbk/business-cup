@@ -14,11 +14,13 @@ export default function Home() {
           One sentence about the problem you solve.
         </p>
         <div className="flex gap-3">
+          {/* No prefetch: the first request to /protected creates the
+              visitor's guest session, so it should happen on click, not for
+              every landing page view. */}
           <Button asChild>
-            <Link href="/auth/sign-up">Get started</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/auth/login">Sign in</Link>
+            <Link href="/protected" prefetch={false}>
+              Get started
+            </Link>
           </Button>
         </div>
       </section>

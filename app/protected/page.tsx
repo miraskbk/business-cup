@@ -1,19 +1,31 @@
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 async function Welcome() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
 
-  if (error || !data?.claims) {
-    redirect("/auth/login");
+  if (error || !claims) {
+    return (
+      <p className="text-destructive">
+        We couldn&apos;t start your session. Refresh the page to try again.
+      </p>
+    );
+  }
+
+  if (claims.is_anonymous || !claims.email) {
+    return (
+      <p className="text-muted-foreground">
+        Guest session{" "}
+        <span className="font-mono">{claims.sub.slice(0, 8)}</span>. No account
+        needed, and only you can see what you add here.
+      </p>
+    );
   }
 
   return (
-    <p className="text-muted-foreground">
-      Signed in as {String(data.claims.email)}
-    </p>
+    <p className="text-muted-foreground">Signed in as {claims.email}</p>
   );
 }
 

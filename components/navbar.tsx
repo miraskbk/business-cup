@@ -13,6 +13,7 @@ export function Navbar() {
           </Link>
           <Link
             href="/protected/items"
+            prefetch={false}
             className="text-muted-foreground hover:text-foreground"
           >
             Notes

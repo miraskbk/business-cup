@@ -1,0 +1,8 @@
+# Only the settings this app depends on are declared here.
+# `supabase config push` leaves everything not declared in this file unchanged.
+project_id = "business-cup"
+
+[auth]
+# The app has no sign-up step: lib/supabase/proxy.ts gives every visitor an
+# anonymous user, so this must be on.
+enable_anonymous_sign_ins = true

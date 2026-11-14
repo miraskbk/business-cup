@@ -1,8 +1,11 @@
-import Link from "next/link";
-import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
 
+/**
+ * The app needs no sign-up: visitors get an anonymous session from the proxy.
+ * So the navbar only shows account controls for someone who signed in with a
+ * real (email) account; guests see nothing here.
+ */
 export async function AuthButton() {
   const supabase = await createClient();
 
@@ -11,19 +14,14 @@ export async function AuthButton() {
 
   const user = data?.claims;
 
-  return user ? (
+  if (!user || user.is_anonymous || !user.email) {
+    return null;
+  }
+
+  return (
     <div className="flex items-center gap-4">
       Hey, {user.email}!
       <LogoutButton />
-    </div>
-  ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
     </div>
   );
 }

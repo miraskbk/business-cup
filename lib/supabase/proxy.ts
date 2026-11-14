@@ -2,6 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 
+// Routes that read or write per-user data. Everything else (landing, auth
+// pages, unknown URLs hit by crawlers) stays session-free so bots don't burn
+// through the anonymous sign-in rate limit.
+const SESSION_PATHS = ["/protected", "/api"];
+
+function needsSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  return SESSION_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -47,16 +59,14 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+  // No-login access: a visitor without a session silently gets their own
+  // anonymous Supabase user instead of being sent to a login page. RLS is
+  // unchanged, so every visitor still sees only their own rows.
+  if (!user && needsSession(request)) {
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      console.error("Anonymous sign-in failed:", error.message);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
