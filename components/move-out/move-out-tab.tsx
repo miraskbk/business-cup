@@ -16,6 +16,7 @@ import type { Rental } from "@/lib/types";
 import { stateName } from "@/lib/us-states";
 import { InspectionChecklist } from "@/components/inspection/inspection-checklist";
 import { DeductionsList } from "@/components/move-out/deductions-list";
+import { DemandLetter } from "@/components/move-out/demand-letter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -215,6 +216,7 @@ export function MoveOutTab({
       </section>
 
       <DeductionsList rental={rental} />
+      <DemandLetter rental={rental} today={today} />
       <InspectionChecklist rental={rental} phase="move_out" />
 
       <Dialog

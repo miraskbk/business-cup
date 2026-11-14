@@ -2,6 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+@media print {
+  @page {
+    margin: 18mm;
+  }
+
+  body:has(> [data-demand-letter-print]) {
+    background: white !important;
+    color: black !important;
+    height: auto !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body:has(> [data-demand-letter-print]) > :not([data-demand-letter-print]) {
+    display: none !important;
+  }
+
+  [data-demand-letter-print] {
+    display: block !important;
+    font: 11pt/1.5 Arial, sans-serif;
+    color: black;
+    background: white;
+    overflow-wrap: anywhere;
+  }
+
+  .demand-letter-body p {
+    white-space: pre-wrap;
+    break-inside: avoid;
+    margin: 0 0 1.5em;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .demand-letter-index-heading {
+    break-before: page;
+    break-after: avoid;
+  }
+
+  .demand-letter-photos {
+    break-before: page;
+  }
+
+  .demand-letter-photos h1 {
+    margin-bottom: 12pt;
+    font-size: 16pt;
+  }
+
+  .demand-letter-photos figure {
+    break-inside: avoid;
+    margin: 0 0 18pt;
+  }
+
+  .demand-letter-photos figcaption {
+    margin-bottom: 8pt;
+    white-space: pre-wrap;
+  }
+
+  .demand-letter-photos img {
+    max-width: 100%;
+    max-height: 170mm;
+    object-fit: contain;
+  }
+}
+
 @layer base {
   @tailwind base;
   @tailwind components;
