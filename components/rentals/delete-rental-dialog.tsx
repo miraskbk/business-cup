@@ -36,12 +36,26 @@ export function DeleteRentalDialog({ rental, onOpenChange, onDeleted }: Props) {
       .from("rentals")
       .delete()
       .eq("id", rental.id);
-    setDeleting(false);
-
     if (error) {
+      setDeleting(false);
       toast.error(`Couldn't delete the rental: ${error.message}`);
       return;
     }
+
+    // The rows cascade in the database; the evidence photos live in storage
+    // and are removed here. Rows go first so a failure never loses photos
+    // for a rental that still exists.
+    const folder = `${rental.user_id}/${rental.id}`;
+    const { data: photos } = await supabase.storage
+      .from("evidence")
+      .list(folder, { limit: 1000 });
+    if (photos && photos.length > 0) {
+      await supabase.storage
+        .from("evidence")
+        .remove(photos.map((photo) => `${folder}/${photo.name}`));
+    }
+    setDeleting(false);
+
     toast.success("Rental deleted");
     onDeleted(rental);
     onOpenChange(false);

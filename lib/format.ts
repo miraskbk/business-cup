@@ -44,3 +44,18 @@ export function todayISO(now: Date = new Date()): ISODate {
   const dayOfMonth = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${dayOfMonth}`;
 }
+
+/**
+ * "Nov 14, 2026, 2:05 PM" from a timestamp, in the viewer's time zone unless
+ * one is given.
+ */
+export function formatDateTime(timestamp: string, timeZone?: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+  }).format(new Date(timestamp));
+}
