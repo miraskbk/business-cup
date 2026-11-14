@@ -4,10 +4,10 @@ import { AuthButton } from "@/components/auth-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ShieldCheck, ArrowUpRight } from "lucide-react";
 
-export function Navbar() {
+export function Navbar({ minimal = false }: { minimal?: boolean }) {
   return (
     <nav
-      className="sticky top-0 z-30 h-[72px] w-full border-b bg-background/95 backdrop-blur-md"
+      className={`sticky top-0 z-30 h-[72px] w-full bg-background/95 backdrop-blur-md ${minimal ? "" : "border-b"}`}
       aria-label="Main navigation"
     >
       <div className="mx-auto flex h-full max-w-[1360px] items-center justify-between gap-5 px-6 lg:px-10">
@@ -20,30 +20,37 @@ export function Navbar() {
             <ShieldCheck className="size-7 text-primary" strokeWidth={1.7} />
             safer
           </Link>
-          {/* No prefetch: the first request to /protected creates the
-              visitor's guest session, so it should happen on click. */}
-          <Link
-            href="/protected"
-            prefetch={false}
-            className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-primary sm:block"
-          >
-            My rentals
-          </Link>
+          {/* Avoid creating a guest session until a protected link is clicked. */}
+          {!minimal && (
+            <Link
+              href="/protected"
+              prefetch={false}
+              className="hidden text-sm font-medium text-muted-foreground transition-colors hover:text-primary sm:block"
+            >
+              My rentals
+            </Link>
+          )}
         </div>
         <div className="flex items-center gap-3 sm:gap-5">
-          <Link
-            href="/protected/sample"
-            prefetch={false}
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Explore demo
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-          <span className="h-5 border-l" aria-hidden />
+          {!minimal && (
+            <>
+              <Link
+                href="/protected/sample"
+                prefetch={false}
+                className="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Explore demo
+                <ArrowUpRight className="size-3.5" />
+              </Link>
+              <span className="h-5 border-l" aria-hidden />
+            </>
+          )}
           <ThemeSwitcher />
-          <Suspense>
-            <AuthButton />
-          </Suspense>
+          {!minimal && (
+            <Suspense>
+              <AuthButton />
+            </Suspense>
+          )}
         </div>
       </div>
     </nav>
