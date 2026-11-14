@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export default function RentalsPage() {
   const [supabase] = useState(() => createClient());
@@ -96,8 +97,8 @@ export default function RentalsPage() {
         <div className="rounded-lg border border-dashed p-10 text-center">
           <p className="font-medium">No rentals yet</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Add the place you rent to start recording its condition and
-            tracking your deposit.
+            Add the place you rent to start recording its condition and tracking
+            your deposit.
           </p>
           <Button className="mt-4" onClick={openCreate}>
             <Plus />
@@ -188,7 +189,12 @@ function RentalCard({
         </DropdownMenu>
       </CardHeader>
       <CardContent className="space-y-3">
-        <RentalStatusBadge status={status} />
+        <div className="flex flex-wrap gap-2">
+          <RentalStatusBadge status={status} />
+          {rental.is_sample && (
+            <Badge variant="outline">Sample apartment</Badge>
+          )}
+        </div>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           <dt className="text-muted-foreground">Deposit</dt>
           <dd className="text-right font-medium">

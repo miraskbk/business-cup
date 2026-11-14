@@ -11,6 +11,8 @@ import type { Rental } from "@/lib/types";
 import { stateName } from "@/lib/us-states";
 import { InspectionChecklist } from "@/components/inspection/inspection-checklist";
 import { MoveOutTab } from "@/components/move-out/move-out-tab";
+import { LeaseLog } from "@/components/lease-log/lease-log";
+import { RenewalCalculator } from "@/components/renewal/renewal-calculator";
 import { DeleteRentalDialog } from "@/components/rentals/delete-rental-dialog";
 import { RentalFormDialog } from "@/components/rentals/rental-form-dialog";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
@@ -32,6 +34,7 @@ export function RentalDetail() {
   const [supabase] = useState(() => createClient());
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [editOpen, setEditOpen] = useState(false);
+  const [tab, setTab] = useState("move-in");
   const [deleting, setDeleting] = useState<Rental | null>(null);
 
   const load = useCallback(async () => {
@@ -103,19 +106,41 @@ export function RentalDetail() {
             onDelete={() => setDeleting(state.rental)}
           />
 
-          <Tabs defaultValue="move-in">
+          {state.rental.is_sample && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-secondary/40 bg-secondary/5 p-4">
+              <div className="max-w-2xl space-y-1">
+                <p className="font-semibold">Sample apartment</p>
+                <p className="text-sm text-muted-foreground">
+                  Fictional rental with simulated dates and AI-generated example
+                  photos. Your changes are saved to your own session. Start with
+                  the January 2025 move-in record, then compare move-out.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTab("move-out")}
+              >
+                Compare move-out
+              </Button>
+            </div>
+          )}
+
+          <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="max-w-full justify-start overflow-x-auto">
               <TabsTrigger value="move-in">Move-in</TabsTrigger>
-              <TabsTrigger value="lease-log" disabled>
-                Lease log
-              </TabsTrigger>
-              <TabsTrigger value="renewal" disabled>
-                Renewal
-              </TabsTrigger>
+              <TabsTrigger value="lease-log">Lease log</TabsTrigger>
+              <TabsTrigger value="renewal">Renewal</TabsTrigger>
               <TabsTrigger value="move-out">Move-out</TabsTrigger>
             </TabsList>
             <TabsContent value="move-in" className="mt-4">
               <InspectionChecklist rental={state.rental} phase="move_in" />
+            </TabsContent>
+            <TabsContent value="lease-log" className="mt-4">
+              <LeaseLog rental={state.rental} />
+            </TabsContent>
+            <TabsContent value="renewal" className="mt-4">
+              <RenewalCalculator rental={state.rental} />
             </TabsContent>
             <TabsContent value="move-out" className="mt-4">
               <MoveOutTab

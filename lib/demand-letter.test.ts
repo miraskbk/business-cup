@@ -16,6 +16,7 @@ const rental: Rental = {
   lease_end: "2026-10-14",
   move_out_date: "2026-10-14",
   deposit_returned_at: null,
+  is_sample: false,
   created_at: "2025-01-04T10:00:00Z",
 };
 const deduction = (overrides: Partial<Deduction> = {}): Deduction => ({
@@ -58,6 +59,11 @@ function letter(overrides: Partial<typeof input> = {}) {
 }
 
 describe("demand letter", () => {
+  it("labels sample letters so simulated evidence cannot be mistaken for a real demand", () => {
+    const result = letter({ rental: { ...rental, is_sample: true } });
+    assert.ok(result.text.startsWith("SAMPLE LETTER - fictional rental"));
+    assert.ok(result.text.includes("Not a real payment demand."));
+  });
   it("uses the real rental, disputed amount, dates, official citation and recorded evidence", () => {
     const result = letter();
     assert.equal(result.amountRequested, 300);

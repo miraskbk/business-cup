@@ -19,6 +19,8 @@ export type Rental = {
   move_out_date: ISODate | null;
   /** Set when the renter confirms the deposit has been returned/resolved. */
   deposit_returned_at: ISODate | null;
+  /** Fictional data created by the sample-apartment demo. */
+  is_sample: boolean;
   created_at: string;
 };
 
@@ -51,5 +53,24 @@ export type Deduction = {
   amount: number;
   /** Whether the renter contests this deduction. */
   disputed: boolean;
+  created_at: string;
+};
+
+export type LeaseEventKind =
+  | "repair_request"
+  | "landlord_promise"
+  | "notice"
+  | "payment"
+  | "other";
+
+export type LeaseEvent = {
+  id: string;
+  user_id: string;
+  rental_id: string;
+  kind: LeaseEventKind;
+  title: string;
+  details: string | null;
+  due_date: ISODate | null;
+  resolved: boolean;
   created_at: string;
 };

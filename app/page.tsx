@@ -12,16 +12,21 @@ export default function Home() {
         </h1>
         <p className="max-w-xl text-muted-foreground">
           Renters lose deposit money when they can&apos;t prove what the
-          apartment looked like at move-in, or don&apos;t know the landlord&apos;s
-          legal deadline to return it.
+          apartment looked like at move-in, or don&apos;t know the
+          landlord&apos;s legal deadline to return it.
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {/* No prefetch: the first request to /protected creates the
               visitor's guest session, so it should happen on click, not for
               every landing page view. */}
           <Button asChild>
             <Link href="/protected" prefetch={false}>
               Protect my deposit
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/protected/sample" prefetch={false}>
+              Try with a sample apartment
             </Link>
           </Button>
         </div>

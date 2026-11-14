@@ -17,7 +17,7 @@ export type RentalDraft = {
 /** What gets written to the `rentals` table. */
 export type RentalPayload = Omit<
   Rental,
-  "id" | "user_id" | "created_at" | "deposit_returned_at"
+  "id" | "user_id" | "created_at" | "deposit_returned_at" | "is_sample"
 >;
 
 export type RentalErrors = Partial<Record<keyof RentalDraft, string>>;

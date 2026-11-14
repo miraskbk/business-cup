@@ -97,6 +97,11 @@ export function generateDemandLetter(input: LetterInput): LetterResult {
   const deadline = deadlineFor(rental);
 
   const paragraphs = [
+    ...(rental.is_sample
+      ? [
+          "SAMPLE LETTER - fictional rental, simulated dates, and AI-generated example photos. Not a real payment demand.",
+        ]
+      : []),
     formatDate(today),
     `To: ${rental.landlord_name?.trim() || "Landlord or property manager"}${rental.landlord_email ? `\nEmail: ${rental.landlord_email}` : ""}`,
     `Re: Security deposit refund - ${rental.address}`,
