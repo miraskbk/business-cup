@@ -8,10 +8,12 @@ export default function Home() {
       <Navbar />
       <section className="flex flex-1 flex-col items-center justify-center gap-6 px-5 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Your product name
+          Get your full deposit back
         </h1>
         <p className="max-w-xl text-muted-foreground">
-          One sentence about the problem you solve.
+          Renters lose deposit money when they can&apos;t prove what the
+          apartment looked like at move-in, or don&apos;t know the landlord&apos;s
+          legal deadline to return it.
         </p>
         <div className="flex gap-3">
           {/* No prefetch: the first request to /protected creates the
@@ -19,7 +21,7 @@ export default function Home() {
               every landing page view. */}
           <Button asChild>
             <Link href="/protected" prefetch={false}>
-              Get started
+              Protect my deposit
             </Link>
           </Button>
         </div>
