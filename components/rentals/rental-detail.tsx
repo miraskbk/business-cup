@@ -168,7 +168,7 @@ function RentalSummary({
     },
     { label: "Lease", value: lease },
     {
-      label: status === "moved_out" ? "Moved out" : "Move-out date",
+      label: status === "active" ? "Move-out date" : "Moved out",
       value: rental.move_out_date ? formatDate(rental.move_out_date) : null,
     },
     { label: "Landlord", value: rental.landlord_name },

@@ -197,7 +197,7 @@ function RentalCard({
           {rental.move_out_date ? (
             <>
               <dt className="text-muted-foreground">
-                {status === "moved_out" ? "Moved out" : "Moving out"}
+                {status === "active" ? "Moving out" : "Moved out"}
               </dt>
               <dd className="text-right">{formatDate(rental.move_out_date)}</dd>
             </>

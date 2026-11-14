@@ -73,18 +73,31 @@ describe("validateRentalDraft", () => {
 
 describe("rentalStatus", () => {
   const today = "2026-11-14";
-
-  it("is active with no move-out date or one in the future", () => {
-    assert.equal(rentalStatus({ move_out_date: null }, today), "active");
-    assert.equal(rentalStatus({ move_out_date: "2026-12-01" }, today), "active");
+  const rental = (state: string, move_out_date: string | null) => ({
+    state,
+    move_out_date,
   });
 
-  it("is moved out from the move-out date onwards", () => {
-    assert.equal(rentalStatus({ move_out_date: today }, today), "moved_out");
+  it("is active with no move-out date or one in the future", () => {
+    assert.equal(rentalStatus(rental("CA", null), today), "active");
+    assert.equal(rentalStatus(rental("CA", "2026-12-01"), today), "active");
+  });
+
+  it("is moved out from the move-out date until the state deadline passes", () => {
+    assert.equal(rentalStatus(rental("CA", today), today), "moved_out");
+    // California allows 21 days: Oct 24 + 21 = Nov 14, the deadline day itself.
+    assert.equal(rentalStatus(rental("CA", "2026-10-24"), today), "moved_out");
+  });
+
+  it("is overdue the day after the state deadline", () => {
     assert.equal(
-      rentalStatus({ move_out_date: "2026-10-14" }, today),
-      "moved_out",
+      rentalStatus(rental("CA", "2026-10-23"), today),
+      "deposit_overdue",
     );
+  });
+
+  it("never reports overdue for a state without a verified rule", () => {
+    assert.equal(rentalStatus(rental("WY", "2020-01-01"), today), "moved_out");
   });
 });
 

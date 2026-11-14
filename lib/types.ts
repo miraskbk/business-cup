@@ -39,3 +39,15 @@ export type InspectionItem = {
   /** When the evidence was recorded. Set by the database, never edited. */
   captured_at: string;
 };
+
+/** An amount the landlord says they are keeping from the deposit. */
+export type Deduction = {
+  id: string;
+  user_id: string;
+  rental_id: string;
+  description: string;
+  amount: number;
+  /** Whether the renter contests this deduction. */
+  disputed: boolean;
+  created_at: string;
+};

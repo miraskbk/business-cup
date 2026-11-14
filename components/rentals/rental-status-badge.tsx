@@ -4,10 +4,12 @@ import {
   type RentalStatus,
 } from "@/lib/rental-status";
 
+const VARIANT: Record<RentalStatus, "default" | "secondary" | "destructive"> = {
+  active: "default",
+  moved_out: "secondary",
+  deposit_overdue: "destructive",
+};
+
 export function RentalStatusBadge({ status }: { status: RentalStatus }) {
-  return (
-    <Badge variant={status === "active" ? "default" : "secondary"}>
-      {RENTAL_STATUS_LABEL[status]}
-    </Badge>
-  );
+  return <Badge variant={VARIANT[status]}>{RENTAL_STATUS_LABEL[status]}</Badge>;
 }
