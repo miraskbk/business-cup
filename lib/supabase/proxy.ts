@@ -5,7 +5,7 @@ import { hasEnvVars } from "../utils";
 // Routes that read or write per-user data. Everything else (landing, auth
 // pages, unknown URLs hit by crawlers) stays session-free so bots don't burn
 // through the anonymous sign-in rate limit.
-const SESSION_PATHS = ["/protected", "/api"];
+const SESSION_PATHS = ["/protected"];
 
 function needsSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
